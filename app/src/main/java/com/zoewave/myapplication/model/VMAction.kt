@@ -5,7 +5,7 @@ import com.zoewave.myapplication.room.Word
 import javax.inject.Inject
 
 enum class MVOperation {
-    DeleteAll, NotEdit, CanEdit, InsertWord;
+    DeleteAll, NotEdit, CanEdit, InsertWord, AddAPIWorld;
 }
 
 class VMAction @Inject constructor() {
@@ -17,6 +17,7 @@ class VMAction @Inject constructor() {
             // MVVM to change data
             MVOperation.InsertWord -> wordViewModel.insert(word = word)
             MVOperation.DeleteAll -> wordViewModel.deleteAllWords()
+            MVOperation.AddAPIWorld -> wordViewModel.addAPIWord()
 
             // MVI to change the state of the app
             MVOperation.NotEdit -> wordViewModel.userIntentChannel.offer(UserIntent.SetCanNotEdit)

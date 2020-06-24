@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme() {
-                AppContent(mainComposeUI, addWordComposeUI, vmAction, wordViewModel)
+                AppContent(mainComposeUI, addWordComposeUI, wordViewModel)
             }
         }
     }
@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
 private fun AppContent(
     mainComposeUI: MainComposeUI,
     addWordComposeUI: AddWordComposeUI,
-    vmAction: VMAction,
     wordViewModel: WordViewModel
 ) {
     Crossfade(AppScreen.currentScreen) { screen ->

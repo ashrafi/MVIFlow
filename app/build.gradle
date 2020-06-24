@@ -55,8 +55,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
     // hilt
-    implementation "com.google.dagger:hilt-android:2.28-alpha"
-    kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
+    implementation 'com.google.dagger:hilt-android:2.28.1-alpha'
+    kapt 'com.google.dagger:hilt-android-compiler:2.28.1-alpha'
     implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha01'
     // When using Kotlin.
     kapt 'androidx.hilt:hilt-compiler:1.0.0-alpha01'
@@ -114,8 +114,15 @@ dependencies {
     // -- Compose -- End
 
     // -- Networking -- Start
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation 'org.conscrypt:conscrypt-android:2.4.0'
+
+    // moshi
+    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
 
 
     // Testing

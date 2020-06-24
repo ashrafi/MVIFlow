@@ -69,7 +69,7 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
         viewModel: WordViewModel
     ) {
         BottomAppBar(fabConfiguration = fabConfiguration, cutoutShape = fabShape) {
-            IconButton(onClick = { /* doSomething() */ }) {
+            IconButton(onClick = { vmAction.action(MVOperation.AddAPIWorld, viewModel) }) {
                 Icon(Icons.Filled.Face)
             }
             IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, viewModel) }) {

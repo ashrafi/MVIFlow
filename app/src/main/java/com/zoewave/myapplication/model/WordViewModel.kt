@@ -41,4 +41,8 @@ class WordViewModel @ViewModelInject constructor(
     fun deleteAllWords() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAllWords()
     }
+
+    fun addAPIWord() = viewModelScope.launch(Dispatchers.IO) {
+        repository.callAPI()
+    }
 }
