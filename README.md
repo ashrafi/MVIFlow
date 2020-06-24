@@ -16,9 +16,9 @@ Replacing:
 
 ---
 
-MVI is patterned after QuickBirks [post](https://quickbirdstudios.com/blog/android-mvi-kotlin-coroutines-flow/)
+MVI is patterned after this QuickBirks [post](https://quickbirdstudios.com/blog/android-mvi-kotlin-coroutines-flow/)
 
-We have an [App State] which is -- can/can't [change](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L15) the Room DB.
+We have an[ App State](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L15) which is -- can/can't [change](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L43) the Room DB with [Button Click](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/ui/AddWordComposeUI.kt#L119).
 
 Setup a [channel](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L31) 
 and a [state](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L39)
@@ -30,5 +30,17 @@ The single source of state is used to give [access to the DB](https://github.com
 We update the state of the app with MVI but we update the data with MVVM.   
 This is done with the standard [Room](https://github.com/ashrafi/MVIFlow/tree/master/app/src/main/java/com/zoewave/myapplication/room) -to> [Repo](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/WordRepo.kt) -to> [UI](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/ui/MainComposeUI.kt#L29)
 
+
+Reall like this division. Do <B>NOT</B> want to persist the edit state. Do want to persist the data.
+
+--- 
+We see how easy it is to build a [list] in Compose and set ui [dynaically](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/ui/MainComposeUI.kt#L91) 
+
 ---
-We see how easy it is to build a [list] in Compose and 
+Dagger [Hilt](https://github.com/ashrafi/MVIFlow/tree/master/app/src/main/java/com/zoewave/myapplication/di) is great. It reduces boylerplate and makes scoping easy to work with.  Just set the lifecycle by chosing which component to intsall into.
+
+---
+
+
+
+
