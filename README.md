@@ -3,7 +3,7 @@ Repo for the 360|AnDev [Talk](https://360andev.com/sessions/composing-magic-with
 [Slides](https://docs.google.com/presentation/d/105QxLVF57nKV5Q1Yaw5Zyk7on5E-Q3Ewid6U-5M8I00/edit?usp=sharing).     
 Video code walkthrough link (coming soon)
 
-Detailed Discription:
+Detailed Description:
 
 We take a standard MVVM Android Arch Component (ACC) project (Room, Repo, ModelView, Activities/XML) and replace them with "the new stuff".
 
@@ -31,15 +31,16 @@ We update the state of the app with MVI but we update the data with MVVM.
 This is done with the standard [Room](https://github.com/ashrafi/MVIFlow/tree/master/app/src/main/java/com/zoewave/myapplication/room) -to> [Repo](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/WordRepo.kt) -to> [UI](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/ui/MainComposeUI.kt#L29)
 
 
-Reall like this division. Do <B>NOT</B> want to persist the edit state. Do want to persist the data.
+Really like this [division](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/VMAction.kt#L13). Do <B>NOT</B> want to persist the edit state. Do want to persist the data.
 
 --- 
 We see how easy it is to build a [list] in Compose and set ui [dynaically](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/ui/MainComposeUI.kt#L91) 
 
 ---
-Dagger [Hilt](https://github.com/ashrafi/MVIFlow/tree/master/app/src/main/java/com/zoewave/myapplication/di) is great. It reduces boylerplate and makes scoping easy to work with.  Just set the lifecycle by chosing which component to intsall into.
+Dagger [Hilt](https://github.com/ashrafi/MVIFlow/tree/master/app/src/main/java/com/zoewave/myapplication/di) is great. It reduces boilerplate and makes scoping easy to work with.  Just set the lifecycle by chosing which component to intsall into.
 
 ---
+Navigation [screen](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L59)
 
 
 
