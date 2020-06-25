@@ -2,34 +2,32 @@ package com.zoewave.myapplication.ui
 
 import androidx.compose.*
 import androidx.ui.core.Modifier
+import androidx.ui.core.tag
 import androidx.ui.foundation.Icon
 import androidx.ui.foundation.Text
-import androidx.ui.foundation.TextField
-import androidx.ui.foundation.TextFieldValue
+import androidx.ui.foundation.drawBackground
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
-import androidx.ui.input.VisualTransformation
-import androidx.ui.layout.Column
-import androidx.ui.layout.Row
-import androidx.ui.layout.fillMaxWidth
-import androidx.ui.layout.padding
+import androidx.ui.input.TextFieldValue
+import androidx.ui.layout.*
 import androidx.ui.material.*
 import androidx.ui.material.icons.Icons
 import androidx.ui.material.icons.filled.Delete
 import androidx.ui.material.icons.filled.Face
 import androidx.ui.unit.dp
+import androidx.ui.viewmodel.viewModel
 import com.zoewave.myapplication.model.*
 import com.zoewave.myapplication.room.Word
 import javax.inject.Inject
 
-class AddWordComposeUI @Inject constructor(private var vmAction : VMAction){
+
+class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
     // Setup AmbientOf current state
-    val CurrAppState = ambientOf<AppState> { AppState.Edit }
+    private val CurrAppState = ambientOf<AppState> { AppState.Edit }
 
     @Composable
-    fun ScaffoldWithBottomBar(
-        wordViewModel: WordViewModel
-    ) {
+    fun ScaffoldWithBottomBar() {
+        val wordViewModel = viewModel<WordViewModel>()
         val scaffoldState = remember { ScaffoldState() }
         // both bottom app bar and FAB need to know this shape
         val fabShape = RoundedCornerShape(50)
@@ -39,15 +37,14 @@ class AddWordComposeUI @Inject constructor(private var vmAction : VMAction){
             Scaffold(
                 scaffoldState = scaffoldState,
                 bodyContent = {
-                    addWord(wordViewModel)
+                    Column {
+                        addWord(wordViewModel)
+                        //DemoInlineDSL()
+                        DemoConstraintSet()
+                    }
                 },
-                bottomAppBar = {
-                    bottomBarAddWord(
-                        fabConfiguration = it,
-                        fabShape = fabShape,
-                        //mvAction = vmAction,
-                        wordViewModel = wordViewModel
-                    )
+                bottomBar = {
+                    bottomBarAddWord(fabShape = fabShape)
                 }
             )
         }
@@ -56,16 +53,21 @@ class AddWordComposeUI @Inject constructor(private var vmAction : VMAction){
 
     @Composable
     fun bottomBarAddWord(
-        fabConfiguration: BottomAppBar.FabConfiguration?,
-        fabShape: RoundedCornerShape,
-        wordViewModel : WordViewModel
+        fabShape: RoundedCornerShape
     ) {
-        BottomAppBar(fabConfiguration = fabConfiguration, cutoutShape = fabShape) {
-            IconButton(onClick = { /* doSomething() */ }) {
-                Icon(Icons.Filled.Face)
-            }
-            IconButton(onClick = { vmAction.action(MVOperation.DeleteAll,wordViewModel) }) {
-                Icon(Icons.Filled.Delete)
+        val wordViewModel = viewModel<WordViewModel>()
+        BottomAppBar(cutoutShape = fabShape) {
+            if (CurrAppState.current == AppState.Edit) {
+                IconButton(
+                    modifier = Modifier.drawBackground(color = Color.Gray),
+                    onClick = {
+                        vmAction.action(MVOperation.AddAPIWorld, wordViewModel)
+                    }) {
+                    Icon(Icons.Filled.Face)
+                }
+                IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, wordViewModel) }) {
+                    Icon(Icons.Filled.Delete)
+                }
             }
             switchState(wordViewModel)
         }
@@ -73,9 +75,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction : VMAction){
 
 
     @Composable
-    fun switchState(
-        wordViewModel: WordViewModel
-    ) {
+    fun switchState(wordViewModel: WordViewModel) {
         Switch(
             checked = (CurrAppState.current == AppState.Edit),
             onCheckedChange = {
@@ -91,9 +91,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction : VMAction){
 
 
     @Composable
-    fun addWord(
-        wordViewModel: WordViewModel
-    ) {
+    fun addWord(wordViewModel: WordViewModel) {
         Column() {
             var textValue by state { TextFieldValue("") }
             val currAppState = wordViewModel.state.collectAsState(initial = AppState.Edit)
@@ -134,6 +132,54 @@ class AddWordComposeUI @Inject constructor(private var vmAction : VMAction){
                         )
                 }
             }
+        }
+    }
+
+    @Composable
+    fun DemoInlineDSL() {
+        ConstraintLayout {
+            val (text1, text2, text3) = createRefs()
+
+            Text("Text1", Modifier.constrainAs(text1) {
+                start.linkTo(text2.end, margin = 20.dp)
+            })
+            Text("Text2", Modifier.constrainAs(text2) {
+                centerTo(parent)
+            })
+
+            val barrier = createBottomBarrier(text1, text2)
+            Text("This is a very long text", Modifier.constrainAs(text3) {
+                top.linkTo(barrier, margin = 20.dp)
+                centerHorizontallyTo(parent)
+                width = Dimension.preferredWrapContent.atMost(40.dp)
+            })
+        }
+    }
+
+    @Composable
+    fun DemoConstraintSet() {
+        ConstraintLayout(ConstraintSet2 {
+            val text1 = createRefFor("text1")
+            val text2 = createRefFor("text2")
+            val text3 = createRefFor("text3")
+
+            constrain(text1) {
+                start.linkTo(text2.end, margin = 20.dp)
+            }
+            constrain(text2) {
+                centerTo(parent)
+            }
+
+            val barrier = createBottomBarrier(text1, text2)
+            constrain(text3) {
+                top.linkTo(barrier, margin = 20.dp)
+                centerHorizontallyTo(parent)
+                width = Dimension.preferredWrapContent.atMost(40.dp)
+            }
+        }) {
+            Text("Text1", Modifier.tag("text1"))
+            Text("Text2", Modifier.tag("text2"))
+            Text("This is a very long text", Modifier.tag("text3"))
         }
     }
 }

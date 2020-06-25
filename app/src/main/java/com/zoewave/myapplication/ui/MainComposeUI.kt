@@ -7,6 +7,7 @@ import androidx.ui.core.Modifier
 import androidx.ui.foundation.AdapterList
 import androidx.ui.foundation.Icon
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.lazy.LazyColumnItems
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
@@ -16,6 +17,7 @@ import androidx.ui.material.icons.filled.*
 import androidx.ui.text.font.FontStyle
 import androidx.ui.unit.TextUnit
 import androidx.ui.unit.dp
+import androidx.ui.viewmodel.viewModel
 import com.zoewave.myapplication.model.*
 import com.zoewave.myapplication.room.Word
 import javax.inject.Inject
@@ -24,65 +26,54 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
     // Setup AmbientOf current state
     val CurrAppState = ambientOf<AppState> { AppState.Edit }
 
-
     @Composable
-    fun HomeScreen(
-        viewModel: WordViewModel
-    ) {
-        val currState by viewModel.state.collectAsState(initial = AppState.NotEdit)
+    fun HomeScreen() {
+        val wordViewModel = viewModel<WordViewModel>()
+        val currState by wordViewModel.state.collectAsState(initial = AppState.NotEdit)
         CurrAppState.provides(currState)
         Providers(CurrAppState provides currState) {
-            ScaffoldWithBottomBarAndCutout(viewModel)
+            ScaffoldWithBottomBarAndCutout(wordViewModel)
         }
     }
 
     @Composable
-    fun ScaffoldWithBottomBarAndCutout(
-        viewModel: WordViewModel
-    ) {
+    fun ScaffoldWithBottomBarAndCutout(wordViewModel: WordViewModel) {
         val scaffoldState = remember { ScaffoldState() }
-        val words by viewModel.allWords.collectAsState(initial = emptyList())
+        val words by wordViewModel.allWords.collectAsState(initial = emptyList())
         // both bottom app bar and FAB need to know this shape
         val fabShape = RoundedCornerShape(50)
 
         Scaffold(
             scaffoldState = scaffoldState,
-            topAppBar = { TopAppBar(title = { Text("List of words") }) },
+            topBar = { TopAppBar(title = { Text("List of words") }) },
             bodyContent = { contentBody(words = words) },
-            bottomAppBar = {
-                bottomBar(
-                    fabConfiguration = it,
-                    fabShape = fabShape,
-                    viewModel = viewModel
-                )
+            bottomBar = {
+                bottomBar()
             },
             floatingActionButton = { FAB(fabShape) },
-            floatingActionButtonPosition = Scaffold.FabPosition.EndDocked
+            floatingActionButtonPosition = Scaffold.FabPosition.End
             //floatingActionButtonPosition = Scaffold.FabPosition.CenterDocked
         )
     }
 
     @Composable
-    fun bottomBar(
-        fabConfiguration: BottomAppBar.FabConfiguration?,
-        fabShape: RoundedCornerShape,
-        viewModel: WordViewModel
-    ) {
-        BottomAppBar(fabConfiguration = fabConfiguration, cutoutShape = fabShape) {
-            IconButton(onClick = { vmAction.action(MVOperation.AddAPIWorld, viewModel) }) {
+    fun bottomBar() {
+        val wordViewModel = viewModel<WordViewModel>()
+        BottomAppBar() {
+            IconButton(onClick = { vmAction.action(MVOperation.AddAPIWorld, wordViewModel) }) {
                 Icon(Icons.Filled.Face)
             }
-            IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, viewModel) }) {
+            IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, wordViewModel) }) {
                 Icon(Icons.Filled.Delete)
             }
-            switchState(viewModel)
+            switchState(wordViewModel)
         }
     }
 
     @Composable
     fun contentBody(words: List<Word>) {
         Column() {
-            AdapterList(data = words) { word ->
+            LazyColumnItems(items = words, itemContent = { word ->
                 Card(
                     color = Color.Cyan, //colors[it % colors.size],
                     shape = RoundedCornerShape(8.dp),
@@ -97,20 +88,20 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
                         )
                     }
                 }
-            }
+            })
         }
     }
 
 
     @Composable
-    fun switchState(viewModel: WordViewModel) {
+    fun switchState(wordViewModel: WordViewModel) {
         Switch(
             checked = (CurrAppState.current == AppState.Edit),
             onCheckedChange = {
                 if (it) {
-                    vmAction.action(MVOperation.CanEdit, viewModel)
+                    vmAction.action(MVOperation.CanEdit, wordViewModel)
                 } else {
-                    vmAction.action(MVOperation.NotEdit, viewModel)
+                    vmAction.action(MVOperation.NotEdit, wordViewModel)
                 }
             },
             color = Color.Cyan

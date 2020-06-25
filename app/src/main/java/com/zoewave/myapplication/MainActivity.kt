@@ -17,9 +17,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    // inject viewModel
-    private val wordViewModel: WordViewModel by viewModels()
-
     @Inject
     lateinit var vmAction : VMAction
 
@@ -33,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme() {
-                AppContent(mainComposeUI, addWordComposeUI, wordViewModel)
+                AppContent(mainComposeUI, addWordComposeUI)
             }
         }
     }
@@ -46,16 +43,15 @@ class MainActivity : AppCompatActivity() {
 @Composable
 private fun AppContent(
     mainComposeUI: MainComposeUI,
-    addWordComposeUI: AddWordComposeUI,
-    wordViewModel: WordViewModel
+    addWordComposeUI: AddWordComposeUI
 ) {
     Crossfade(AppScreen.currentScreen) { screen ->
         Surface(color = MaterialTheme.colors.background) {
 
             backButtonHandler(onBackPressed = { navigateTo(NavScreen.Home) })
             when (screen) {
-                is NavScreen.Home -> mainComposeUI.HomeScreen(wordViewModel)
-                is NavScreen.AddWord -> addWordComposeUI.ScaffoldWithBottomBar(wordViewModel = wordViewModel)
+                is NavScreen.Home -> mainComposeUI.HomeScreen()
+                is NavScreen.AddWord -> addWordComposeUI.ScaffoldWithBottomBar()
             }
         }
     }

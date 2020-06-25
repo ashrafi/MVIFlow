@@ -29,8 +29,8 @@ task clean(type: Delete) {
 }
 
 ext {
-    ui_version = '0.1.0-dev13'
-    compose_version = '0.1.0-dev13'
+    compose_ui_version = '0.1.0-dev14'
+    compose_version = '0.1.0-dev14'
 
     roomVersion = '2.2.5'
     archLifecycleVersion = '2.2.0'
