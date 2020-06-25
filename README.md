@@ -1,8 +1,8 @@
+THIS SECTION IS STILL UNDER CONSTRUCTION ... HARD HAT 👷‍♀️ Area. Please use Caution ⚠️
 # MVI KFlow
 Repo for the 360|AnDev [Talk](https://360andev.com/sessions/composing-magic-with-jetpack-compose/) & 
 [Slides](https://docs.google.com/presentation/d/105QxLVF57nKV5Q1Yaw5Zyk7on5E-Q3Ewid6U-5M8I00/edit?usp=sharing).     
 Video code walkthrough link (coming soon)   
-THIS SECTION IS STILL UNDER CONSTRUCTION ... HARD HAT 👷‍♀️ Area. Please use Caution ⚠️
 
 Detailed Description:
 
@@ -17,7 +17,7 @@ Replacing:
 
 ---
 
-MVI is patterned after this QuickBirks [post](https://quickbirdstudios.com/blog/android-mvi-kotlin-coroutines-flow/)
+The MVI is patterned after this QuickBirks [post](https://quickbirdstudios.com/blog/android-mvi-kotlin-coroutines-flow/)
 
 We have an[ App State](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L15) which is -- can/can't [change](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/model/AppState.kt#L43) the Room DB with [Button Click](https://github.com/ashrafi/MVIFlow/blob/master/app/src/main/java/com/zoewave/myapplication/ui/AddWordComposeUI.kt#L119).
 
