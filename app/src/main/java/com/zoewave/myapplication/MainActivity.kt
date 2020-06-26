@@ -18,9 +18,6 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var vmAction : VMAction
-
-    @Inject
     lateinit var addWordComposeUI : AddWordComposeUI
 
     @Inject

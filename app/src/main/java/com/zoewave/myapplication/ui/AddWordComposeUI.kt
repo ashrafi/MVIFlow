@@ -5,6 +5,7 @@ import androidx.ui.core.Modifier
 import androidx.ui.core.tag
 import androidx.ui.foundation.Icon
 import androidx.ui.foundation.Text
+import androidx.ui.foundation.TextField
 import androidx.ui.foundation.drawBackground
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
@@ -25,6 +26,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
     // Setup AmbientOf current state
     private val CurrAppState = ambientOf<AppState> { AppState.Edit }
 
+
     @Composable
     fun ScaffoldWithBottomBar() {
         val wordViewModel = viewModel<WordViewModel>()
@@ -39,8 +41,6 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
                 bodyContent = {
                     Column {
                         addWord(wordViewModel)
-                        //DemoInlineDSL()
-                        DemoConstraintSet()
                     }
                 },
                 bottomBar = {
@@ -89,15 +89,26 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
         )
     }
 
-
     @Composable
     fun addWord(wordViewModel: WordViewModel) {
-        Column() {
-            var textValue by state { TextFieldValue("") }
-            val currAppState = wordViewModel.state.collectAsState(initial = AppState.Edit)
-            Column() {
-                Surface(color = Color.LightGray, modifier = Modifier.padding(16.dp)) {
+        var textValue by state { TextFieldValue("") }
+        val currAppState = wordViewModel.state.collectAsState(initial = AppState.Edit)
+        ConstraintLayout {
 
+            val (filTxtField, bot) = createRefs()
+
+            Surface(color = Color.LightGray,
+                modifier = Modifier.padding(16.dp)
+                    .constrainAs(filTxtField) {
+                        if (currAppState.value == AppState.Edit)
+                            bottom.linkTo(bot.top)
+                        else
+                            top.linkTo(bot.bottom)
+
+                    }
+                    .padding(5.dp)) {
+
+                if (currAppState.value == AppState.Edit) {
                     FilledTextField(
                         value = textValue,
                         onValueChange = { textValue = it },
@@ -105,81 +116,48 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
                         placeholder = { Text(text = "") },
                         modifier = Modifier.padding(16.dp) + Modifier.fillMaxWidth()
                     )
-
+                }else {
+                    TextField(
+                        value = textValue,
+                        onValueChange = {},
+                        modifier = Modifier.padding(16.dp) + Modifier.fillMaxWidth()
+                    )
                 }
 
-                Button(
-                    modifier = Modifier.padding(16.dp),
-                    elevation = 5.dp,
-                    //backgroundColor = if(canEdit) backgroundColor = Color.Gray,
-                    onClick = {
-                        // see if we can change the state.
-                        if (currAppState.value == AppState.Edit) {
-                            wordViewModel.insert(Word(textValue.text))
-                        }
-                        // COMPOSE DOES NOT HAVE NAVIGATION FINALIZED!
-                        // Workaround ---
-                        // https://gist.github.com/adamp/62d13fe5bf0d6ddf9fcf58f8a6769523
-                        navigateTo(NavScreen.Home)
-                    }) {
+
+            }
+            Button(
+                modifier = Modifier.padding(16.dp)
+                    .constrainAs(bot) {
+                        if (currAppState.value == AppState.Edit)
+                            top.linkTo(filTxtField.bottom)
+                        else
+                            bottom.linkTo(filTxtField.top)
+                    }
+                    .drawBackground(Color.Cyan),
+                elevation = 5.dp,
+                //backgroundColor = if(canEdit) backgroundColor = Color.Gray,
+                onClick = {
+                    // see if we can change the state.
                     if (currAppState.value == AppState.Edit) {
-                        Text(text = "Add Word", modifier = Modifier.padding(16.dp))
-                    } else
-                        Text(
-                            text = "DISABLELED",
-                            modifier = Modifier.padding(16.dp),
-                            color = Color.Gray
-                        )
-                }
+                        wordViewModel.insert(Word(textValue.text))
+                    }
+                    // COMPOSE DOES NOT HAVE NAVIGATION FINALIZED!
+                    // Workaround ---
+                    // https://gist.github.com/adamp/62d13fe5bf0d6ddf9fcf58f8a6769523
+                    navigateTo(NavScreen.Home)
+                }) {
+                if (currAppState.value == AppState.Edit) {
+                    Text(text = "Add Word", modifier = Modifier.padding(16.dp))
+                } else
+                    Text(
+                        text = "DISABLELED",
+                        modifier = Modifier.padding(16.dp),
+                        color = Color.Gray
+                    )
             }
+
         }
-    }
 
-    @Composable
-    fun DemoInlineDSL() {
-        ConstraintLayout {
-            val (text1, text2, text3) = createRefs()
-
-            Text("Text1", Modifier.constrainAs(text1) {
-                start.linkTo(text2.end, margin = 20.dp)
-            })
-            Text("Text2", Modifier.constrainAs(text2) {
-                centerTo(parent)
-            })
-
-            val barrier = createBottomBarrier(text1, text2)
-            Text("This is a very long text", Modifier.constrainAs(text3) {
-                top.linkTo(barrier, margin = 20.dp)
-                centerHorizontallyTo(parent)
-                width = Dimension.preferredWrapContent.atMost(40.dp)
-            })
-        }
-    }
-
-    @Composable
-    fun DemoConstraintSet() {
-        ConstraintLayout(ConstraintSet2 {
-            val text1 = createRefFor("text1")
-            val text2 = createRefFor("text2")
-            val text3 = createRefFor("text3")
-
-            constrain(text1) {
-                start.linkTo(text2.end, margin = 20.dp)
-            }
-            constrain(text2) {
-                centerTo(parent)
-            }
-
-            val barrier = createBottomBarrier(text1, text2)
-            constrain(text3) {
-                top.linkTo(barrier, margin = 20.dp)
-                centerHorizontallyTo(parent)
-                width = Dimension.preferredWrapContent.atMost(40.dp)
-            }
-        }) {
-            Text("Text1", Modifier.tag("text1"))
-            Text("Text2", Modifier.tag("text2"))
-            Text("This is a very long text", Modifier.tag("text3"))
-        }
     }
 }
