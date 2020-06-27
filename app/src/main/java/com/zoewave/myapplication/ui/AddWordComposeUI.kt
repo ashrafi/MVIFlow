@@ -2,7 +2,6 @@ package com.zoewave.myapplication.ui
 
 import androidx.compose.*
 import androidx.ui.core.Modifier
-import androidx.ui.core.tag
 import androidx.ui.foundation.Icon
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.TextField
@@ -10,11 +9,13 @@ import androidx.ui.foundation.drawBackground
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.TextFieldValue
-import androidx.ui.layout.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.ConstraintLayout
+import androidx.ui.layout.fillMaxWidth
+import androidx.ui.layout.padding
 import androidx.ui.material.*
 import androidx.ui.material.icons.Icons
 import androidx.ui.material.icons.filled.Delete
-import androidx.ui.material.icons.filled.Face
 import androidx.ui.unit.dp
 import androidx.ui.viewmodel.viewModel
 import com.zoewave.myapplication.model.*
@@ -58,13 +59,6 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
         val wordViewModel = viewModel<WordViewModel>()
         BottomAppBar(cutoutShape = fabShape) {
             if (CurrAppState.current == AppState.Edit) {
-                IconButton(
-                    modifier = Modifier.drawBackground(color = Color.Gray),
-                    onClick = {
-                        vmAction.action(MVOperation.AddAPIWorld, wordViewModel)
-                    }) {
-                    Icon(Icons.Filled.Face)
-                }
                 IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, wordViewModel) }) {
                     Icon(Icons.Filled.Delete)
                 }
@@ -141,6 +135,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
                     // see if we can change the state.
                     if (currAppState.value == AppState.Edit) {
                         wordViewModel.insert(Word(textValue.text))
+                        vmAction.action(MVOperation.AddAPIWorld, wordViewModel)
                     }
                     // COMPOSE DOES NOT HAVE NAVIGATION FINALIZED!
                     // Workaround ---

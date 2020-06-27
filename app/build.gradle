@@ -120,6 +120,9 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation 'org.conscrypt:conscrypt-android:2.4.0'
 
+    // coil
+    implementation  "io.coil-kt:coil:$coil_version"
+
     // moshi
     implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
 

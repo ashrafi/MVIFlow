@@ -3,23 +3,36 @@ package com.zoewave.myapplication.ui
 //import androidx.ui.livedata.observeAsState
 import android.util.Log
 import androidx.compose.*
+import androidx.core.graphics.drawable.toBitmap
+import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Modifier
-import androidx.ui.foundation.AdapterList
 import androidx.ui.foundation.Icon
+import androidx.ui.foundation.Image
 import androidx.ui.foundation.Text
 import androidx.ui.foundation.lazy.LazyColumnItems
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
-import androidx.ui.layout.*
+import androidx.ui.graphics.ImageAsset
+import androidx.ui.graphics.asImageAsset
+import androidx.ui.layout.Column
+import androidx.ui.layout.padding
 import androidx.ui.material.*
 import androidx.ui.material.icons.Icons
-import androidx.ui.material.icons.filled.*
+import androidx.ui.material.icons.filled.Add
+import androidx.ui.material.icons.filled.Close
+import androidx.ui.material.icons.filled.Delete
+import androidx.ui.material.icons.filled.Face
 import androidx.ui.text.font.FontStyle
 import androidx.ui.unit.TextUnit
 import androidx.ui.unit.dp
 import androidx.ui.viewmodel.viewModel
+import coil.Coil
+import coil.request.GetRequest
 import com.zoewave.myapplication.model.*
 import com.zoewave.myapplication.room.Word
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
@@ -58,21 +71,41 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
 
     @Composable
     fun bottomBar() {
+        var showPopup by state { false }
+        val onPopupDismissed = { showPopup = false }
         val wordViewModel = viewModel<WordViewModel>()
-        BottomAppBar() {
-            IconButton(onClick = { vmAction.action(MVOperation.AddAPIWorld, wordViewModel) }) {
-                Icon(Icons.Filled.Face)
-            }
+        BottomAppBar {
+            IconButton(onClick = {
+                showPopup = true
+            }) { Icon(Icons.Filled.Face) }
             IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, wordViewModel) }) {
                 Icon(Icons.Filled.Delete)
             }
             switchState(wordViewModel)
+            if (showPopup) {
+                AlertDialog(
+                    onCloseRequest = onPopupDismissed,
+                    text = {
+                        Column {
+                            Text("Network Image")
+                            showImage()
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = onPopupDismissed
+                        ) {
+                            Text(text = "Ok")
+                        }
+                    })
+            }
         }
     }
 
+
     @Composable
     fun contentBody(words: List<Word>) {
-        Column() {
+        Column {
             LazyColumnItems(items = words, itemContent = { word ->
                 Card(
                     color = Color.Cyan, //colors[it % colors.size],
@@ -106,9 +139,8 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
             },
             color = Color.Cyan
         )
-        if (CurrAppState.current == AppState.NotEdit) {
+        if (CurrAppState.current == AppState.NotEdit)
             ShowAlert()
-        }
     }
 
     @Composable
@@ -143,7 +175,9 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
             AlertDialog(
                 onCloseRequest = onPopupDismissed,
                 text = {
-                    Text("System Edit is OFF")
+                    Column {
+                        Text("System Edit is OFF")
+                    }
                 },
                 confirmButton = {
                     Button(
@@ -154,4 +188,29 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
                 })
         }
     }
+
+    @Composable
+    fun showImage() {
+        val image = state<ImageAsset> { ImageAsset(24, 24) }
+        val image_data =
+            "https://www.sail-world.com/photos/sailworld/photos/Large_610577174_SD5_3584.jpg"
+
+        val request = GetRequest.Builder(ContextAmbient.current)
+            .data(image_data)
+            //.transformations(CircleCropTransformation())
+            .build()
+
+        CoroutineScope(Dispatchers.Main.immediate).launch {
+            // Start loading the image and await the result.
+            val drawable = Coil.execute(request).drawable
+            image.value = drawable?.toBitmap(
+                width = drawable.intrinsicWidth,
+                height = drawable.intrinsicHeight
+            )!!.asImageAsset()
+        }
+
+        Image(asset = image.value)
+
+    }
+
 }

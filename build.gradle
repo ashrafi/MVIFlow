@@ -40,4 +40,7 @@ ext {
     okhttp_version = '4.7.2'
     retrofit_version = '2.9.0'
     moshi_version = '1.9.3'
+
+    coil_version = '0.11.0'
+
 }
