@@ -1,7 +1,6 @@
 package com.zoewave.myapplication
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.*
 import androidx.ui.animation.Crossfade
