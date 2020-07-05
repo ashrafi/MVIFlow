@@ -1,7 +1,7 @@
 package com.zoewave.myapplication.di
 
-import com.zoewave.myapplication.room.WordDao
 import com.zoewave.myapplication.model.WordRepo
+import com.zoewave.myapplication.room.WordDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +16,6 @@ object RepoModule {
     @Provides
     @ActivityRetainedScoped
     fun provideWordRepo(wordDao: WordDao, retrofit: Retrofit): WordRepo {
-        return WordRepo(wordDao,retrofit)
+        return WordRepo(wordDao, retrofit)
     }
 }

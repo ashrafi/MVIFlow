@@ -9,10 +9,7 @@ import androidx.ui.foundation.drawBackground
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.TextFieldValue
-import androidx.ui.layout.Column
-import androidx.ui.layout.ConstraintLayout
-import androidx.ui.layout.fillMaxWidth
-import androidx.ui.layout.padding
+import androidx.ui.layout.*
 import androidx.ui.material.*
 import androidx.ui.material.icons.Icons
 import androidx.ui.material.icons.filled.Delete
@@ -23,9 +20,12 @@ import com.zoewave.myapplication.room.Word
 import javax.inject.Inject
 
 
-class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
+class AddWordComposeUI @Inject constructor(
+    private var vmAction: VMAction,
+    private var viewState: ViewState
+) {
     // Setup AmbientOf current state
-    private val CurrAppState = ambientOf<AppState> { AppState.Edit }
+    private val CurrAppState = ambientOf<ViewState> { viewState }
 
 
     @Composable
@@ -34,7 +34,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
         val scaffoldState = remember { ScaffoldState() }
         // both bottom app bar and FAB need to know this shape
         val fabShape = RoundedCornerShape(50)
-        val currState by wordViewModel.state.collectAsState(initial = AppState.NotEdit)
+        val currState by wordViewModel.state.collectAsState(initial = viewState)
         CurrAppState.provides(currState)
         Providers(CurrAppState provides currState) {
             Scaffold(
@@ -58,7 +58,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
     ) {
         val wordViewModel = viewModel<WordViewModel>()
         BottomAppBar(cutoutShape = fabShape) {
-            if (CurrAppState.current == AppState.Edit) {
+            if (CurrAppState.current.appState == AppState.Edit) {
                 IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, wordViewModel) }) {
                     Icon(Icons.Filled.Delete)
                 }
@@ -71,7 +71,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
     @Composable
     fun switchState(wordViewModel: WordViewModel) {
         Switch(
-            checked = (CurrAppState.current == AppState.Edit),
+            checked = (CurrAppState.current.appState == AppState.Edit),
             onCheckedChange = {
                 if (it) {
                     vmAction.action(MVOperation.CanEdit, wordViewModel)
@@ -86,23 +86,23 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
     @Composable
     fun addWord(wordViewModel: WordViewModel) {
         var textValue by state { TextFieldValue("") }
-        val currAppState = wordViewModel.state.collectAsState(initial = AppState.Edit)
+        val currAppState = wordViewModel.state.collectAsState(initial = viewState)
         ConstraintLayout {
 
-            val (filTxtField, bot) = createRefs()
+            val (filTxtField, addButton) = createRefs()
 
             Surface(color = Color.LightGray,
                 modifier = Modifier.padding(16.dp)
                     .constrainAs(filTxtField) {
-                        if (currAppState.value == AppState.Edit)
-                            bottom.linkTo(bot.top)
+                        if (currAppState.value.appState == AppState.Edit)
+                            bottom.linkTo(addButton.top)
                         else
-                            top.linkTo(bot.bottom)
+                            top.linkTo(addButton.bottom)
 
                     }
                     .padding(5.dp)) {
 
-                if (currAppState.value == AppState.Edit) {
+                if (currAppState.value.appState == AppState.Edit) {
                     FilledTextField(
                         value = textValue,
                         onValueChange = { textValue = it },
@@ -110,7 +110,7 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
                         placeholder = { Text(text = "") },
                         modifier = Modifier.padding(16.dp) + Modifier.fillMaxWidth()
                     )
-                }else {
+                } else {
                     TextField(
                         value = textValue,
                         onValueChange = {},
@@ -120,38 +120,74 @@ class AddWordComposeUI @Inject constructor(private var vmAction: VMAction) {
 
 
             }
-            Button(
-                modifier = Modifier.padding(16.dp)
-                    .constrainAs(bot) {
-                        if (currAppState.value == AppState.Edit)
-                            top.linkTo(filTxtField.bottom)
-                        else
-                            bottom.linkTo(filTxtField.top)
-                    }
-                    .drawBackground(Color.Cyan),
-                elevation = 5.dp,
-                //backgroundColor = if(canEdit) backgroundColor = Color.Gray,
-                onClick = {
-                    // see if we can change the state.
-                    if (currAppState.value == AppState.Edit) {
-                        wordViewModel.insert(Word(textValue.text))
-                        vmAction.action(MVOperation.AddAPIWorld, wordViewModel)
-                    }
-                    // COMPOSE DOES NOT HAVE NAVIGATION FINALIZED!
-                    // Workaround ---
-                    // https://gist.github.com/adamp/62d13fe5bf0d6ddf9fcf58f8a6769523
-                    navigateTo(NavScreen.Home)
-                }) {
-                if (currAppState.value == AppState.Edit) {
-                    Text(text = "Add Word", modifier = Modifier.padding(16.dp))
-                } else
-                    Text(
-                        text = "DISABLELED",
-                        modifier = Modifier.padding(16.dp),
-                        color = Color.Gray
-                    )
+            Row(modifier = Modifier.constrainAs(addButton) {
+                if (currAppState.value.appState == AppState.Edit)
+                    top.linkTo(filTxtField.bottom)
+                else
+                    bottom.linkTo(filTxtField.top)
+            }) {
+                Button(
+                    modifier = Modifier.padding(16.dp)
+                        .drawBackground(Color.Cyan),
+                    elevation = 5.dp,
+                    //backgroundColor = if(canEdit) backgroundColor = Color.Gray,
+                    onClick = {
+                        // see if we can change the state.
+                        if (currAppState.value.appState == AppState.Edit) {
+                            vmAction.action(
+                                MVOperation.InsertWord,
+                                wordViewModel,
+                                Word(textValue.text)
+                            )
+                            //vmAction.action(MVOperation.AddAPIWorld, wordViewModel)
+                        }
+                        // COMPOSE DOES NOT HAVE NAVIGATION FINALIZED!
+                        // Workaround ---
+                        // https://gist.github.com/adamp/62d13fe5bf0d6ddf9fcf58f8a6769523
+                        navigateTo(
+                            NavScreen.Home
+                        )
+                    }) {
+                    if (currAppState.value.appState == AppState.Edit) {
+                        Text(text = "Add Word", modifier = Modifier.padding(16.dp))
+                    } else
+                        Text(
+                            text = "DISABLELED",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray
+                        )
+                }
+                Button(
+                    modifier = Modifier.padding(16.dp)
+                        .drawBackground(Color.Cyan),
+                    elevation = 5.dp,
+                    //backgroundColor = if(canEdit) backgroundColor = Color.Gray,
+                    onClick = {
+                        // see if we can change the state.
+                        if (currAppState.value.appState == AppState.Edit) {
+                            vmAction.action(
+                                MVOperation.AddAPIWorld,
+                                wordViewModel
+                            )
+                            //vmAction.action(MVOperation.AddAPIWorld, wordViewModel)
+                        }
+                        // COMPOSE DOES NOT HAVE NAVIGATION FINALIZED!
+                        // Workaround ---
+                        // https://gist.github.com/adamp/62d13fe5bf0d6ddf9fcf58f8a6769523
+                        navigateTo(
+                            NavScreen.Home
+                        )
+                    }) {
+                    if (currAppState.value.appState == AppState.Edit) {
+                        Text(text = "Add API Words", modifier = Modifier.padding(16.dp))
+                    } else
+                        Text(
+                            text = "DISABLELED",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray
+                        )
+                }
             }
-
         }
 
     }

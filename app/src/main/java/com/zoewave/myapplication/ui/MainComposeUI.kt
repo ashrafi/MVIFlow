@@ -21,7 +21,7 @@ import androidx.ui.material.icons.Icons
 import androidx.ui.material.icons.filled.Add
 import androidx.ui.material.icons.filled.Close
 import androidx.ui.material.icons.filled.Delete
-import androidx.ui.material.icons.filled.Face
+import androidx.ui.material.icons.filled.Favorite
 import androidx.ui.text.font.FontStyle
 import androidx.ui.unit.TextUnit
 import androidx.ui.unit.dp
@@ -29,20 +29,19 @@ import androidx.ui.viewmodel.viewModel
 import coil.Coil
 import coil.request.GetRequest
 import com.zoewave.myapplication.model.*
-import com.zoewave.myapplication.room.Word
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
+class MainComposeUI @Inject constructor(private val vmAction: VMAction) {
     // Setup AmbientOf current state
-    val CurrAppState = ambientOf<AppState> { AppState.Edit }
+    private val CurrAppState = ambientOf<ViewState> { ViewState() }
 
     @Composable
     fun HomeScreen() {
         val wordViewModel = viewModel<WordViewModel>()
-        val currState by wordViewModel.state.collectAsState(initial = AppState.NotEdit)
+        val currState: ViewState by wordViewModel.state.collectAsState(initial = ViewState())
         CurrAppState.provides(currState)
         Providers(CurrAppState provides currState) {
             ScaffoldWithBottomBarAndCutout(wordViewModel)
@@ -52,14 +51,14 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
     @Composable
     fun ScaffoldWithBottomBarAndCutout(wordViewModel: WordViewModel) {
         val scaffoldState = remember { ScaffoldState() }
-        val words by wordViewModel.allWords.collectAsState(initial = emptyList())
+        //val words by wordViewModel.allWords.collectAsState(initial = emptyList())
         // both bottom app bar and FAB need to know this shape
         val fabShape = RoundedCornerShape(50)
 
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = { TopAppBar(title = { Text("List of words") }) },
-            bodyContent = { contentBody(words = words) },
+            bodyContent = { contentBody() },
             bottomBar = {
                 bottomBar()
             },
@@ -77,7 +76,7 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
         BottomAppBar {
             IconButton(onClick = {
                 showPopup = true
-            }) { Icon(Icons.Filled.Face) }
+            }) { Icon(Icons.Filled.Favorite) }
             IconButton(onClick = { vmAction.action(MVOperation.DeleteAll, wordViewModel) }) {
                 Icon(Icons.Filled.Delete)
             }
@@ -104,7 +103,8 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
 
 
     @Composable
-    fun contentBody(words: List<Word>) {
+    fun contentBody(/*words: List<Word>*/) {
+        val words = CurrAppState.current.allWords.collectAsState(initial = emptyList()).value
         Column {
             LazyColumnItems(items = words, itemContent = { word ->
                 Card(
@@ -112,7 +112,7 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.padding(8.dp)
                 ) {
-                    if (CurrAppState.current == AppState.Edit) {
+                    if (CurrAppState.current.appState == AppState.Edit) {
                         Text("${word.word}")
                     } else {
                         Text(
@@ -129,7 +129,7 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
     @Composable
     fun switchState(wordViewModel: WordViewModel) {
         Switch(
-            checked = (CurrAppState.current == AppState.Edit),
+            checked = (CurrAppState.current.appState == AppState.Edit),
             onCheckedChange = {
                 if (it) {
                     vmAction.action(MVOperation.CanEdit, wordViewModel)
@@ -139,7 +139,7 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
             },
             color = Color.Cyan
         )
-        if (CurrAppState.current == AppState.NotEdit)
+        if (CurrAppState.current.appState == AppState.NotEdit)
             ShowAlert()
     }
 
@@ -158,7 +158,7 @@ class MainComposeUI @Inject constructor(private val vmAction : VMAction) {
             IconButton(onClick = {
                 navigateTo(NavScreen.AddWord)
             }) {
-                if (CurrAppState.current == AppState.Edit)
+                if (CurrAppState.current.appState == AppState.Edit)
                     Icon(asset = Icons.Filled.Add)
                 else
                     Icon(asset = Icons.Filled.Close)

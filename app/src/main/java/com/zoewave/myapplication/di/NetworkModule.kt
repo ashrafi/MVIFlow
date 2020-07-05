@@ -23,7 +23,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideAuthInterceptorOkHttpClient(
-        logging : HttpLoggingInterceptor
+        logging: HttpLoggingInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(logging.setLevel(HttpLoggingInterceptor.Level.BODY))
@@ -31,12 +31,12 @@ object NetworkModule {
     }
 
     @Provides
-    fun provideLogging() : HttpLoggingInterceptor {
+    fun provideLogging(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor()
     }
 
     @Provides
-    fun provideMoshi() : Moshi {
+    fun provideMoshi(): Moshi {
         return Moshi.Builder()
             .add(KotlinJsonAdapterFactory())
             .build()
@@ -46,7 +46,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(
         okHttpClient: OkHttpClient,
-        moshi : Moshi
+        moshi: Moshi
     ): Retrofit {
         return Retrofit.Builder()
             .addConverterFactory(MoshiConverterFactory.create(moshi))

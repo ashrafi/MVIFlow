@@ -1,7 +1,9 @@
 package com.zoewave.myapplication.room
 
-import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 
@@ -12,10 +14,10 @@ interface WordDao {
     fun getAlphabetizedWords(): Flow<List<Word>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(word: Word)
+    suspend fun insert(word: Word)
 
     @Query("DELETE FROM word_table")
-    fun deleteAll()
+    suspend fun deleteAll()
 }
 
 

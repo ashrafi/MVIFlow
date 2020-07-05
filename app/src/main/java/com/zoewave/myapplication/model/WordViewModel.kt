@@ -3,10 +3,9 @@ package com.zoewave.myapplication.model
 import android.app.Application
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
-import com.zoewave.myapplication.room.Word
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 class WordViewModel @ViewModelInject constructor(
@@ -16,33 +15,19 @@ class WordViewModel @ViewModelInject constructor(
     application: Application
 ) : AndroidViewModel(application) {
 
-    val allWords: Flow<List<Word>> = repository.allWords
-
     // MVI channel and app state used by the views.
+
+    // Input from views
     val userIntentChannel = stateChannel.userIntentChannel
+
+    // output to repo
     val state = stateChannel.state
 
     init {
         // Setup State
         viewModelScope.launch {
-            stateChannel.handleIntents()
+            stateChannel.handleIntents(repository)
         }
-    }
 
-    /**
-     * Launching a new coroutine to insert the data in a non-blocking way
-     */
-    fun insert(word: Word?) = viewModelScope.launch(Dispatchers.IO) {
-        word?.let {
-            repository.insert(word)
-        }
-    }
-
-    fun deleteAllWords() = viewModelScope.launch(Dispatchers.IO) {
-        repository.deleteAllWords()
-    }
-
-    fun addAPIWord() = viewModelScope.launch(Dispatchers.IO) {
-        repository.callAPI()
     }
 }

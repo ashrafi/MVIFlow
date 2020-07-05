@@ -1,13 +1,12 @@
 package com.zoewave.myapplication.di
 
-import com.zoewave.myapplication.model.AppState
 import com.zoewave.myapplication.model.StateChannel
+import com.zoewave.myapplication.model.ViewState
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Singleton
 
 // application scope
 @InstallIn(ApplicationComponent::class)
@@ -19,14 +18,18 @@ object StateModule {
      * initial value. The value of mutable state flow can be updated by setting its value property.
      */
     @Provides
-    fun providesChannel(state: MutableStateFlow<AppState>) : StateChannel {
-        return StateChannel(state)
+    fun providesChannel(): StateChannel {
+        return StateChannel()
     }
 
     @Provides
-    @Singleton
-    fun providesAppState() : MutableStateFlow<AppState> {
-        return MutableStateFlow<AppState>(AppState.Edit)
+    fun providesMutableViewState(): MutableStateFlow<ViewState> {
+        return MutableStateFlow(ViewState())
+    }
+
+    @Provides
+    fun providesViewState(): ViewState {
+        return ViewState()
     }
 
 }
