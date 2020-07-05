@@ -35,7 +35,7 @@ sealed class UserIntent {
 /**
  * The ViewModel acts upon these events accordingly by making API calls or saving/retrieving data in the database via the Repository layer.
  */
-class StateChannel @Inject constructor() {//private val _state : MutableStateFlow<ViewState>) {
+class StateChannel @Inject constructor(private val repository: WordRepo) {//private val _state : MutableStateFlow<ViewState>) {
 
     // basic Channel<T> to listen to intents and state changes in the ViewModel
     val userIntentChannel = Channel<UserIntent>()
@@ -46,9 +46,7 @@ class StateChannel @Inject constructor() {//private val _state : MutableStateFlo
     val state: StateFlow<ViewState>
         get() = _state
 
-    suspend fun handleIntents(
-        repository: WordRepo
-    ) {
+    suspend fun handleIntents() {
         // ViewModel update the repository layer.
         // Use the Flow to consume the Channel values. -- ChannelFlow
         // https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
@@ -57,39 +55,41 @@ class StateChannel @Inject constructor() {//private val _state : MutableStateFlo
         userIntentChannel.consumeAsFlow().collect { userIntent ->
             // create a new viewState and set that to the value in the channel
             // Render of the MVI
-            suspend fun render(vs: ViewState, repository: WordRepo): ViewState = when (userIntent) {
-
-                // Update state of app -- Not / Edit
-                UserIntent.SetCanEdit -> {
-                    vs.copy(appState = AppState.Edit)
-                }
-
-                UserIntent.SetCanNotEdit -> {
-                    vs.copy(appState = AppState.NotEdit)
-                }
-
-                // Update data - list of words
-                UserIntent.UpdateAPIWords -> {
-                    repository.callAPI()
-                    vs.copy(allWords = repository.getAllWords())
-                }
-
-                // "is" only needed for classes not objects
-                is UserIntent.UpdateWord -> {
-                    repository.insert(userIntent.word)
-                    vs.copy(allWords = repository.getAllWords())
-                }
-
-                UserIntent.DeleteWords -> {
-                    repository.deleteAllWords()
-                    vs.copy(allWords = repository.getAllWords())
-                }
-            }
-
-
             //TODO: add LCE<Result>(Loading/Content/Error)
-            _state.value = render(_state.value, repository)
+            _state.value = render(userIntent)
 
+        }
+    }
+
+    /**
+     * Takes old state and creates a new immutable state for the UI to render.
+     */
+    private suspend fun render(userIntent: UserIntent) = when (userIntent) {
+
+        // Update state of app -- Not / Edit
+        UserIntent.SetCanEdit -> {
+            _state.value.copy(appState = AppState.Edit)
+        }
+
+        UserIntent.SetCanNotEdit -> {
+            _state.value.copy(appState = AppState.NotEdit)
+        }
+
+        // Update data - list of words
+        UserIntent.UpdateAPIWords -> {
+            repository.callAPI()
+            _state.value.copy(allWords = repository.getAllWords())
+        }
+
+        // "is" only needed for classes not objects
+        is UserIntent.UpdateWord -> {
+            repository.insert(userIntent.word)
+            _state.value.copy(allWords = repository.getAllWords())
+        }
+
+        UserIntent.DeleteWords -> {
+            repository.deleteAllWords()
+            _state.value.copy(allWords = repository.getAllWords())
         }
     }
 }

@@ -2,11 +2,14 @@ package com.zoewave.myapplication.di
 
 import com.zoewave.myapplication.model.StateChannel
 import com.zoewave.myapplication.model.ViewState
+import com.zoewave.myapplication.model.WordRepo
+import com.zoewave.myapplication.room.WordDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ApplicationComponent
 import kotlinx.coroutines.flow.MutableStateFlow
+import retrofit2.Retrofit
 
 // application scope
 @InstallIn(ApplicationComponent::class)
@@ -18,8 +21,8 @@ object StateModule {
      * initial value. The value of mutable state flow can be updated by setting its value property.
      */
     @Provides
-    fun providesChannel(): StateChannel {
-        return StateChannel()
+    fun providesChannel(wordRepo: WordRepo): StateChannel {
+        return StateChannel(wordRepo)
     }
 
     @Provides

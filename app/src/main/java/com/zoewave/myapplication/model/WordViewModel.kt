@@ -26,7 +26,7 @@ class WordViewModel @ViewModelInject constructor(
     init {
         // Setup State
         viewModelScope.launch {
-            stateChannel.handleIntents(repository)
+            stateChannel.handleIntents()
         }
 
     }
