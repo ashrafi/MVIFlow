@@ -35,13 +35,11 @@ sealed class UserIntent {
 /**
  * The ViewModel acts upon these events accordingly by making API calls or saving/retrieving data in the database via the Repository layer.
  */
-class StateChannel @Inject constructor(private val repository: WordRepo) {//private val _state : MutableStateFlow<ViewState>) {
+class StateChannel @Inject constructor(private val repository: WordRepo) {
 
     // basic Channel<T> to listen to intents and state changes in the ViewModel
     val userIntentChannel = Channel<UserIntent>()
-
     private val _state = MutableStateFlow(ViewState())
-
 
     val state: StateFlow<ViewState>
         get() = _state
@@ -50,21 +48,18 @@ class StateChannel @Inject constructor(private val repository: WordRepo) {//priv
         // ViewModel update the repository layer.
         // Use the Flow to consume the Channel values. -- ChannelFlow
         // https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines.flow/channel-flow.html
-
-
         userIntentChannel.consumeAsFlow().collect { userIntent ->
             // create a new viewState and set that to the value in the channel
             // Render of the MVI
             //TODO: add LCE<Result>(Loading/Content/Error)
-            _state.value = render(userIntent)
-
+            _state.value = reduce(userIntent)
         }
     }
 
     /**
      * Takes old state and creates a new immutable state for the UI to render.
      */
-    private suspend fun render(userIntent: UserIntent) = when (userIntent) {
+    private suspend fun reduce(userIntent: UserIntent) = when (userIntent) {
 
         // Update state of app -- Not / Edit
         UserIntent.SetCanEdit -> {
